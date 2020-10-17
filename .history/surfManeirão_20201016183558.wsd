@@ -1,0 +1,199 @@
+@startuml class 
+
+package src {
+
+  
+
+  package client {
+    interface StormGlassPointSource{
+      [key: string]: number
+    }
+
+    interface IStormGlassPoint{
+      +time : string
+      +waveHeight : StormGlassPointSource
+      +waveDirection : StormGlassPointSource
+      +swellDirection : StormGlassPointSource
+      +swellHeight : StormGlassPointSource
+      +swellPeriod : StormGlassPointSource
+      +windDirection : StormGlassPointSource
+      +windSpeed : StormGlassPointSource
+    }
+
+    interface StormGlassForecastResponse{
+      +hours : IStormGlassPoint[]
+    }
+
+    interface IForecastPoint{
+      +time : string
+      +waveHeight : number
+      +waveDirection : number
+      +swellDirection : number
+      +swellHeight : number
+      +swellPeriod : number
+      +windDirection : number
+      +windSpeed : number
+    }
+
+    class StormGlassUnexpectedResponseError extends InternalError{
+
+    }
+
+    class ClientRequestError extends InternalError{
+
+    }
+
+    class StormGlassResponseError extends InternalError{
+
+    }
+
+    class StormGlass{
+      +stormGlassAPIParams : any
+      +stormGlassAPISource : any
+      +fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]>
+      #getForecastPointsFromApi(lat: number, lng: number): Promise<ForecastPoint[]>
+      #getForecastPointsFromCache(key: string): ForecastPoint[] | undefined
+      -getCacheKey(lat: number, lng: number): string
+      -setForecastPointsInCache(key: string, forecastPoints: ForecastPoint[]): boolean
+      -normalizeResponse(points: StormGlassForecastResponse): ForecastPoint[]
+      -isValidPoint(point: Partial<IStormGlassPoint>): boolean
+    }
+
+    IStormGlassPoint --> StormGlassPointSource
+    StormGlass <-- IForecastPoint
+    StormGlass <-- IStormGlassPoint
+    StormGlass <-- StormGlassForecastResponse
+    IStormGlassPoint <-- StormGlassForecastResponse
+  }
+
+  package controllers {
+    class BeachesController{
+      +create(req: Request, res: Response): Promise<void>
+    }
+
+    class BaseController{
+
+    }
+
+    BaseController <|-- BeachesController
+
+    class ForecastController{
+      +getForecastForgeLoggedUser(req: Request, res: Response): Promise<void>
+    }
+
+    class BaseController{
+
+    }
+
+    BaseController <|-- ForecastController
+
+    class BaseController{
+      #sendCreateUpdateErrorResponse(res: Response, error: mongoose.Error.ValidationError | Error): void
+      -handleClientErrors(error: mongoose.Error.ValidationError): TypeLiteral
+      #sendErrorResponse(res: Response, apiError: APIError): Response
+    }
+
+    class UsersController{
+      +create(req: Request, res: Response): Promise<void>
+      +authenticate(req: Request, res: Response): Promise<Response>
+      +me(req: Request, res: Response): Promise<Response>
+    }
+
+    class BaseController{
+
+    }
+
+    BaseController <|-- UsersController
+
+  }
+
+  package middlewares {
+    interface HTTPError extends IAPIError{
+      +status : number
+      +function apiErrorValidator()
+    }
+  }
+
+  package models {
+    enum GeoPosition {
+      S = 'S',
+      E = 'E',
+      W = 'W',
+      N = 'N',
+    }
+
+    interface Beach{
+      +_id : string
+      +name : string
+      +position : GeoPosition
+      +lat : number
+      +lng : number
+      +userId : string
+    }
+
+    interface BeachModel extends Beach {
+
+    }
+
+    BeachModel ..> BeachesController
+    Beach --> GeoPosition
+
+    interface User{
+      +_id : string
+      +name : string
+      +email : string
+      +password : string
+    }
+
+    enum CUSTOM_VALIDATION {
+      DUPLICATED = 'DUPLICATED',
+    }
+
+    interface UserModel extends User{
+
+    }
+
+    UserModel ..> UsersController
+  }
+
+  package server {
+    class SetupServer extends Server{
+      -server : Server
+      +init(): Promise<void>
+      -setupExpress(): void
+      -docsSetup(): Promise<void>
+      -setupControllers(): void
+      -setupErrorHandlers(): void
+      +getApp(): Application
+      -databaseSetup(): Promise<void>
+      +close(): Promise<void>
+      +start(): void
+    }
+
+    SetupServer --> HTTPError
+    SetupServer --* ForecastController
+    SetupServer --* BeachesController
+    SetupServer --* UsersController
+  }
+
+  package types {
+    interface Request{
+      +decoded : DecodedUser
+    }
+
+    class IncomingMessage{
+
+    }
+
+    class Request{
+
+    }
+
+    Request --> DecodedUser
+    IncomingMessage <|-- Request
+  }
+
+  
+}
+
+@enduml

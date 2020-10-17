@@ -1,0 +1,14 @@
+@startuml class
+class ApiInfoPraia {
+  Altura da onda
+  Direção da onda
+  Período de onda
+  Altura da ondulação
+  Direção do on
+  Período de on
+  on Secundário
+  Altura da onda do vento
+  Direção das ondas do vento
+  Período de Ondas de Vento
+}
+@enduml

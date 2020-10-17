@@ -1,0 +1,13 @@
+@startuml class
+
+package Util {}
+
+package Client {}
+package Models {}
+
+package Controllers {}
+package Middlewares {}
+
+package Services {}
+
+@enduml

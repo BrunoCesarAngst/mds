@@ -1,0 +1,35 @@
+@startuml class
+
+package Client {
+  class ApiInfoPraia {
+    Altura da onda
+    Direção da onda
+    Altura da ondulação
+    Direção do ondulação
+    Período de ondulação
+    Velocidade do vento
+    Direção do vento 
+  }
+}
+package Models {
+
+  enum Posição {
+    N
+    S
+    L
+    O
+  }
+
+  interface Praia {
+    -id: Integer
+    -nome: String
+    -posição: Posição
+    -lat: Integer
+    -l
+  }
+}
+package Controllers {}
+package Middlewares {}
+package Services {}
+
+@enduml

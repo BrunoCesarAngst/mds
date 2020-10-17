@@ -1,0 +1,15 @@
+@startuml class
+
+package Client {
+  
+}
+package Controllers {}
+package Middlewares {}
+package Models {}
+package Services {}
+package Cliente {}
+package Cliente {}
+package Cliente {}
+package Cliente {}
+
+@enduml

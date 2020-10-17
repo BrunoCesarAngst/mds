@@ -1,0 +1,71 @@
+@startuml class
+
+package Client {
+  interface StormGlassPointSource{
+
+  }
+
+  interface StormGlassPoint{
+    +time : string
+    +waveHeight : StormGlassPointSource
+    +waveDirection : StormGlassPointSource
+    +swellDirection : StormGlassPointSource
+    +swellHeight : StormGlassPointSource
+    +swellPeriod : StormGlassPointSource
+    +windDirection : StormGlassPointSource
+    +windSpeed : StormGlassPointSource
+  }
+
+  interface StormGlassForecastResponse{
+    +hours : StormGlassPoint[]
+  }
+
+  interface ForecastPoint{
+    +time : string
+    +waveHeight : number
+    +waveDirection : number
+    +swellDirection : number
+    +swellHeight : number
+    +swellPeriod : number
+    +windDirection : number
+    +windSpeed : number
+  }
+
+  class StormGlassUnexpectedResponseError{
+
+  }
+
+  class InternalError{
+
+  }
+
+  class ClientRequestError{
+
+  }
+
+  class StormGlassResponseError{
+
+  }
+
+  class StormGlass{
+    +stormGlassAPIParams : any
+    +stormGlassAPISource : any
+    +fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]>
+    #getForecastPointsFromApi(lat: number, lng: number): Promise<ForecastPoint[]>
+    #getForecastPointsFromCache(key: string): ForecastPoint[] | undefined
+    -getCacheKey(lat: number, lng: number): string
+    -setForecastPointsInCache(key: string, forecastPoints: ForecastPoint[]): boolean
+    -normalizeResponse(points: StormGlassForecastResponse): ForecastPoint[]
+    -isValidPoint(point: Partial<StormGlassPoint>): boolean
+  }
+
+  StormGlassPoint --> StormGlassPointSource
+  InternalError <|-- StormGlassUnexpectedResponseError
+  InternalError <|-- ClientRequestError
+  InternalError <|-- StormGlassResponseError
+}
+
+package Beaches 
+
+
+@enduml

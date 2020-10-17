@@ -1,0 +1,73 @@
+@startuml class
+
+package Util {
+  class Request {
+    #request: {}
+    +get(url)
+  }
+}
+
+package Client {
+  
+  interface IinfoP
+
+  interface IInfoPraia {
+    alturaOnda
+    direçãoOnda
+    alturaOndulação
+    direçãoOndulação
+    períodoOndulação
+    velocidadeVento
+    direçãoVento 
+  }
+
+  class ApiInfoPraia {
+    alturaOnda
+    direçãoOnda
+    alturaOndulação
+    direçãoOndulação
+    períodoOndulação
+    velocidadeVento
+    direçãoVento
+  }
+}
+package Models {
+
+  interface IUser {
+    -id: String
+    -name: String
+    -email: String
+    -password: String
+  }
+
+  interface ModelUser extends IUser {
+    
+  }
+
+  enum Position {
+    N
+    S
+    L
+    O
+  }
+
+  interface IPraia {
+    -id: Integer
+    -name: String
+    -position[1]: Position
+    -lat: Integer
+    -lng: Integer
+    -user: String
+  }
+
+  IPraia -> Position
+
+  interface PraiaModel extends IPraia
+
+  class Praia implements PraiaModel
+}
+package Controllers {}
+package Middlewares {}
+package Services {}
+
+@enduml

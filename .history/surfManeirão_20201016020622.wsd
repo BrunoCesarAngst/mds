@@ -1,0 +1,278 @@
+@startuml class
+
+package Client {
+  interface StormGlassPointSource{
+    [key: string]: number
+  }
+
+  interface IStormGlassPoint{
+    +time : string
+    +waveHeight : StormGlassPointSource
+    +waveDirection : StormGlassPointSource
+    +swellDirection : StormGlassPointSource
+    +swellHeight : StormGlassPointSource
+    +swellPeriod : StormGlassPointSource
+    +windDirection : StormGlassPointSource
+    +windSpeed : StormGlassPointSource
+  }
+
+  interface StormGlassForecastResponse{
+    +hours : IStormGlassPoint[]
+  }
+
+  interface IForecastPoint{
+    +time : string
+    +waveHeight : number
+    +waveDirection : number
+    +swellDirection : number
+    +swellHeight : number
+    +swellPeriod : number
+    +windDirection : number
+    +windSpeed : number
+  }
+
+  class StormGlassUnexpectedResponseError{
+
+  }
+
+  class InternalError{
+
+  }
+
+  class ClientRequestError{
+
+  }
+
+  class StormGlassResponseError{
+
+  }
+
+  class StormGlass{
+    +stormGlassAPIParams : any
+    +stormGlassAPISource : any
+    +fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]>
+    #getForecastPointsFromApi(lat: number, lng: number): Promise<ForecastPoint[]>
+    #getForecastPointsFromCache(key: string): ForecastPoint[] | undefined
+    -getCacheKey(lat: number, lng: number): string
+    -setForecastPointsInCache(key: string, forecastPoints: ForecastPoint[]): boolean
+    -normalizeResponse(points: StormGlassForecastResponse): ForecastPoint[]
+    -isValidPoint(point: Partial<IStormGlassPoint>): boolean
+  }
+
+  IStormGlassPoint --> StormGlassPointSource
+  InternalError <|-- StormGlassUnexpectedResponseError
+  InternalError <|-- ClientRequestError
+  InternalError <|-- StormGlassResponseError
+  StormGlass <-- IForecastPoint
+  StormGlass <-- IStormGlassPoint
+  StormGlass <-- StormGlassForecastResponse
+  IStormGlassPoint <-- StormGlassForecastResponse
+}
+
+package Controllers {
+  class BeachesController{
+    +create(req: Request, res: Response): Promise<void>
+  }
+
+  class BaseController{
+
+  }
+
+  BaseController <|-- BeachesController
+
+  class ForecastController{
+    +getForecastForgeLoggedUser(req: Request, res: Response): Promise<void>
+  }
+
+  class BaseController{
+
+  }
+
+  BaseController <|-- ForecastController
+
+  class BaseController{
+    #sendCreateUpdateErrorResponse(res: Response, error: mongoose.Error.ValidationError | Error): void
+    -handleClientErrors(error: mongoose.Error.ValidationError): TypeLiteral
+    #sendErrorResponse(res: Response, apiError: APIError): Response
+  }
+
+  class UsersController{
+    +create(req: Request, res: Response): Promise<void>
+    +authenticate(req: Request, res: Response): Promise<Response>
+    +me(req: Request, res: Response): Promise<Response>
+  }
+
+  class BaseController{
+
+  }
+
+  BaseController <|-- UsersController
+
+}
+
+package Middlewares {
+  interface HTTPError{
+    +status : number
+  }
+
+  class Error{
+
+  }
+
+  Error <|-- HTTPError
+}
+
+package Models {
+  enum GeoPosition {
+    S = 'S',
+    E = 'E',
+    W = 'W',
+    N = 'N',
+  }
+
+  interface Beach{
+    +_id : string
+    +name : string
+    +position : GeoPosition
+    +lat : number
+    +lng : number
+    +userId : string
+  }
+
+  interface BeachModel extends Beach {
+
+  }
+
+  BeachModel ..> BeachesController
+  Beach --> GeoPosition
+
+  interface User{
+    +_id : string
+    +name : string
+    +email : string
+    +password : string
+  }
+
+  enum CUSTOM_VALIDATION {
+    DUPLICATED = 'DUPLICATED',
+  }
+
+  interface UserModel extends User{
+
+  }
+
+  UserModel ..> UsersController
+}
+
+package Services {
+  interface DecodedUser{
+    +id : string
+  }
+
+  class AuthService{
+    +hashPassword(password: string, salt: any = 10): Promise<string>
+    +comparePasswords(password: string, hashedPassword: string): Promise<boolean>
+    +generateToken(payload: any): string
+    +decodeToken(token: string): DecodedUser
+  }
+    
+  interface BeachForecast{
+    +rating : number
+  }
+
+  class ForecastPoint{
+
+  }
+
+  interface TimeForecast{
+    +time : string
+    +forecast : BeachForecast[]
+  }
+
+  class ForecastProcessingInternalError{
+
+  }
+
+  class InternalError{
+
+  }
+
+  class Forecast{
+    +processForecastForBeaches(beaches: Beach[], orderBy: 'asc' | 'desc' = 'desc', orderField: any = 'rating'): Promise<TimeForecast[]>
+    -calculateRating(beaches: Beach[]): Promise<BeachForecast[]>
+    -mapForecastByTime(forecast: BeachForecast[]): TimeForecast[]
+    -enrichBeachData(points: ForecastPoint[], beach: Beach, rating: Rating): BeachForecast[]
+  }
+
+  ForecastPoint <|-- BeachForecast
+  InternalError <|-- ForecastProcessingInternalError
+
+  class Rating{
+    +getRateForPoint(point: ForecastPoint): number
+    +getRatingBasedOnWindAndWavePositions(waveDirection: GeoPosition, windDirection: GeoPosition): number
+    -isWindOffShore(waveDirection: string, windDirection: string): boolean
+    +getRatingForSwellPeriod(period: number): number
+    +getRatingForSwellSize(height: number): number
+    +getPositionFromLocation(coordinates: number): GeoPosition
+  }
+
+}
+
+package Utils {
+  class CacheUtil{
+    +set(key: string, value: T, ttl: any = 3600): boolean
+    +get(key: string): T | undefined
+    +clearAllCache(): void
+  }
+
+  interface RequestConfig{
+
+  }
+
+  class AxiosRequestConfig{
+
+  }
+
+  interface Response{
+
+  }
+
+  class AxiosResponse{
+
+  }
+
+  class Request{
+    +get(url: string, config: RequestConfig = {}): Promise<Response<T>>
+    +isRequestError(error: AxiosError): boolean
+  }
+
+  AxiosRequestConfig <|-- RequestConfig
+  AxiosResponse <|-- Response
+
+  class TimeUtil{
+    +getUnixTimeForAFutureDay(days: number): number
+  }
+}
+
+class SetupServer{
+  -server : http.Server
+  +init(): Promise<void>
+  -setupExpress(): void
+  -docsSetup(): Promise<void>
+  -setupControllers(): void
+  -setupErrorHandlers(): void
+  +getApp(): Application
+  -databaseSetup(): Promise<void>
+  +close(): Promise<void>
+  +start(): void
+}
+
+class Server{
+
+}
+
+SetupServer --> http.Server
+Server <|-- SetupServer
+
+
+@enduml
